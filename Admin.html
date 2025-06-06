@@ -1,0 +1,90 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - Virutcham Exports</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      padding: 20px;
+    }
+    .admin-container {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .product-box {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+    .product-box input {
+      width: 100%;
+      margin: 5px 0;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .save-btn {
+      padding: 10px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .save-btn:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <h2>Admin Panel</h2>
+  <div id="admin"></div>  <script src="products.js"></script>  <script>
+    const adminEmail = "chandru958@gmail.com";
+    const enteredEmail = prompt("Enter admin email:");
+
+    if (enteredEmail !== adminEmail) {
+      document.body.innerHTML = "<p style='color:red'>Access Denied</p>";
+    } else {
+      const adminDiv = document.getElementById("admin");
+
+      products.forEach((p, index) => {
+        adminDiv.innerHTML += `
+          <div class="product-box">
+            <input type="text" id="name-${index}" value="${p.name}" placeholder="Name">
+            <input type="text" id="desc-${index}" value="${p.description}" placeholder="Description">
+            <input type="text" id="price-${index}" value="${p.price}" placeholder="Price">
+            <input type="text" id="img-${index}" value="${p.image}" placeholder="Image URL">
+            <input type="text" id="min-${index}" value="${p.minQty}" placeholder="Min Qty">
+            <input type="text" id="max-${index}" value="${p.maxQty}" placeholder="Max Qty">
+            <button class="save-btn" onclick="save(${index})">Save</button>
+          </div>
+        `;
+      });
+
+      window.save = function(index) {
+        products[index].name = document.getElementById(`name-${index}`).value;
+        products[index].description = document.getElementById(`desc-${index}`).value;
+        products[index].price = parseInt(document.getElementById(`price-${index}`).value);
+        products[index].image = document.getElementById(`img-${index}`).value;
+        products[index].minQty = parseInt(document.getElementById(`min-${index}`).value);
+        products[index].maxQty = parseInt(document.getElementById(`max-${index}`).value);
+        localStorage.setItem("products", JSON.stringify(products));
+        alert("Product updated (temporarily in browser)");
+      }
+
+      // Load custom products if stored
+      const saved = JSON.parse(localStorage.getItem("products"));
+      if (saved) {
+        for (let i = 0; i < products.length; i++) {
+          if (saved[i]) products[i] = saved[i];
+        }
+      }
+    }
+  </script></body>
+</html>
