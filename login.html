@@ -1,64 +1,105 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Virutcham Exports</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <style>
+    body { font-family: sans-serif; background: #f2f2f2; padding: 20px; text-align: center; }
+    .box { background: white; padding: 20px; max-width: 400px; margin: auto; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input { width: 100%; margin: 8px 0; padding: 10px; border-radius: 6px; border: 1px solid #ccc; }
+    button { padding: 10px 20px; background: #232f3e; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #37475a; }
+  </style>
 </head>
 <body>
-  <h2>Phone Login</h2>
+  <h2>Login / Register</h2>
+  <div class="box">
+    <div id="login-options">
+      <button onclick="showEmailLogin()">Login with Email</button>
+      <button onclick="showPhoneLogin()">Login with Phone</button>
+    </div><!-- Email Login -->
+<div id="email-box" style="display:none">
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="emailLogin()">Login / Register</button>
+  <button onclick="backToOptions()">Back</button>
+</div>
+
+<!-- Phone Login -->
+<div id="phone-box" style="display:none">
+  <input type="tel" id="phone" placeholder="+91XXXXXXXXXX">
   <div id="recaptcha-container"></div>
-  <input type="tel" id="phone" placeholder="+91XXXXXXXXXX" />
   <button onclick="sendOTP()">Send OTP</button>
-
-  <br><br>
-
-  <input type="text" id="otp" placeholder="Enter OTP" />
+  <input type="text" id="otp" placeholder="Enter OTP">
   <button onclick="verifyOTP()">Verify OTP</button>
+  <button onclick="backToOptions()">Back</button>
+</div>
 
-  <script>
+  </div>  <!-- Firebase SDKs -->  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCiAtKa0tbnv3QNlBMofSYZZKjrMrO9FgM",
       authDomain: "virutcham-exports.firebaseapp.com",
       projectId: "virutcham-exports",
+      databaseURL: "https://virutcham-exports-default-rtdb.firebaseio.com",
       storageBucket: "virutcham-exports.appspot.com",
       messagingSenderId: "1009123999187",
       appId: "1:1009123999187:web:29f5dac907e06d56b08326"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-      'size': 'normal',
-      'callback': (response) => {
-        console.log("reCAPTCHA solved");
-      }
-    });
+    function showEmailLogin() {
+      document.getElementById("login-options").style.display = "none";
+      document.getElementById("email-box").style.display = "block";
+    }
 
-    function sendOTP() {
-      const phoneNumber = document.getElementById("phone").value;
-      auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
-        .then((confirmationResult) => {
-          window.confirmationResult = confirmationResult;
-          alert("OTP sent!");
-        })
-        .catch((error) => {
-          alert("Error: " + error.message);
+    function showPhoneLogin() {
+      document.getElementById("login-options").style.display = "none";
+      document.getElementById("phone-box").style.display = "block";
+      window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        size: 'normal',
+        callback: () => {},
+      });
+    }
+
+    function backToOptions() {
+      document.getElementById("email-box").style.display = "none";
+      document.getElementById("phone-box").style.display = "none";
+      document.getElementById("login-options").style.display = "block";
+    }
+
+    function emailLogin() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => window.location.href = "index.html")
+        .catch(err => {
+          if (err.code === 'auth/user-not-found') {
+            auth.createUserWithEmailAndPassword(email, password)
+              .then(() => window.location.href = "index.html")
+              .catch(e => alert(e.message));
+          } else {
+            alert(err.message);
+          }
         });
+    }
+
+    let confirmationResult;
+    function sendOTP() {
+      const phone = document.getElementById("phone").value;
+      auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
+        .then(result => {
+          confirmationResult = result;
+          alert("OTP sent");
+        })
+        .catch(e => alert(e.message));
     }
 
     function verifyOTP() {
-      const code = document.getElementById("otp").value;
-      window.confirmationResult.confirm(code)
-        .then((result) => {
-          alert("Logged in as " + result.user.phoneNumber);
-          window.location.href = "index.html"; // Go back to home
-        })
-        .catch((error) => {
-          alert("Invalid OTP");
-        });
+      const otp = document.getElementById("otp").value;
+      confirmationResult.confirm(otp)
+        .then(() => window.location.href = "index.html")
+        .catch(e => alert("Incorrect OTP"));
     }
-  </script>
-</body>
+  </script></body>
 </html>
