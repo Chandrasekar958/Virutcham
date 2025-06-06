@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Cart - Virutcham Exports</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .cart-container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .cart-item img {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      margin-right: 15px;
+    }
+
+    .cart-item-info {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .cart-item-controls input {
+      width: 50px;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    .checkout {
+      margin-top: 20px;
+      padding: 15px;
+      border-top: 2px solid #ccc;
+    }
+
+    .total {
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+
+    .upi-box {
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .upi-box img {
+      width: 150px;
+      margin: 10px 0;
+    }
+
+    .remove-btn {
+      background: crimson;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .remove-btn:hover {
+      background: darkred;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" style="margin: 20px; display: inline-block;">← Back to Shop</a>
+  <div class="cart-container">
+    <h2>Your Cart</h2>
+    <div id="cart-items"></div>
+
+    <div class="checkout">
+      <div class="total" id="total">Total: ₹0</div>
+
+      <div class="upi-box">
+        <p>Scan & Pay using UPI</p>
+        <img src="images/upi-qr.png" alt="UPI QR Code">
+        <p><b>UPI ID:</b> chandru958-1@okaxis</p>
+        <p>After payment, your order is placed automatically.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="products.js"></script>
+  <script>
+    const cartContainer = document.getElementById("cart-items");
+    const totalBox = document.getElementById("total");
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    function updateCart() {
+      cartContainer.innerHTML = "";
+      let total = 0;
+
+      if (cart.length === 0) {
+        cartContainer.innerHTML = "<p>Your cart is empty.</p>";
+        totalBox.textContent = "Total: ₹0";
+        return;
+      }
+
+      cart.forEach((item, index) => {
+        const product = products.find(p => p.id === item.id);
+        const itemTotal = product.price * item.quantity;
+        total += itemTotal;
+
+        cartContainer.innerHTML += `
+          <div class="cart-item">
+            <div class="cart-item-info">
+              <img src="${product.image}" alt="${product.name}">
+              <div>
+                <h4>${product.name}</h4>
+                <p>₹${product.price} x <input type="number" min="${product.minQty}" max="${product.maxQty}" value="${item.quantity}" onchange="changeQty(${index}, this.value)"> = ₹${itemTotal}</p>
+              </div>
+            </div>
+            <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+          </div>
+        `;
+      });
+
+      totalBox.textContent = `Total: ₹${total}`;
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+
+    function changeQty(index, value) {
+      const qty = parseInt(value);
+      if (!isNaN(qty) && qty >= 1 && qty <= 123) {
+        cart[index].quantity = qty;
+        updateCart();
+      }
+    }
+
+    function removeItem(index) {
+      cart.splice(index, 1);
+      updateCart();
+    }
+
+    updateCart();
+  </script>
+</body>
+</html>
