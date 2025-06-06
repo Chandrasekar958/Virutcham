@@ -201,5 +201,13 @@
     }
   });
 </script>
+  <script>
+  auth.onAuthStateChanged((user) => {
+    if (!user) {
+      alert("Please log in to access this page.");
+      window.location.href = "login.html";
+    }
+  });
+</script>
 </body>
 </html>
