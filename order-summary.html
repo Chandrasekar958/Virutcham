@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order Summary - Virutcham Exports</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 30px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      color: #232f3e;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .order-info {
+      border: 1px solid #febd69;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: #fff8e1;
+      margin-bottom: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #febd69;
+      color: #111;
+    }
+    .total {
+      text-align: right;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    .empty-msg {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #888;
+    }
+    button {
+      display: block;
+      margin: 0 auto;
+      padding: 10px 25px;
+      background-color: #febd69;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #f7a600;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Order Summary</h1>
+  <div id="order-container"></div>
+
+  <button onclick="goHome()">Back to Home</button>
+
+<script>
+  const orderContainer = document.getElementById('order-container');
+  const orderData = JSON.parse(localStorage.getItem('orderData'));
+
+  if (!orderData) {
+    orderContainer.innerHTML = '<p class="empty-msg">No order found. Please place an order first.</p>';
+  } else {
+    const { address, items, paymentMethod, orderDate } = orderData;
+
+    let html = `
+      <div class="order-info">
+        <p><strong>Shipping Address:</strong><br>${address.replace(/,/g, ',<br>')}</p>
+        <p><strong>Payment Method:</strong> ${paymentMethod}</p>
+        <p><strong>Order Date:</strong> ${new Date(orderDate).toLocaleString()}</p>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Product</th><th>Quantity</th><th>Price (₹)</th><th>Total (₹)</th></tr>
+        </thead>
+        <tbody>`;
+
+    let grandTotal = 0;
+    items.forEach(item => {
+      const total = item.price * item.quantity;
+      grandTotal += total;
+      html += `<tr>
+        <td>${item.name}</td>
+        <td>${item.quantity}</td>
+        <td>${item.price.toFixed(2)}</td>
+        <td>${total.toFixed(2)}</td>
+      </tr>`;
+    });
+
+    html += `</tbody></table>`;
+    html += `<p class="total">Grand Total: ₹${grandTotal.toFixed(2)}</p>`;
+
+    orderContainer.innerHTML = html;
+  }
+
+  function goHome() {
+    window.location.href = 'index.html'; // Change if your homepage has different name
+  }
+</script>
+
+</body>
+</html>
