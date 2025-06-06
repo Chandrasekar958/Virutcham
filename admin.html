@@ -86,5 +86,23 @@
         }
       }
     }
-  </script></body>
+  </script><!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCiAtKa0tbnv3QNlBMofSYZZKjrMrO9FgM",
+    authDomain: "virutcham-exports.firebaseapp.com",
+    projectId: "virutcham-exports",
+    databaseURL: "https://virutcham-exports-default-rtdb.firebaseio.com",
+    storageBucket: "virutcham-exports.appspot.com",
+    messagingSenderId: "1009123999187",
+    appId: "1:1009123999187:web:29f5dac907e06d56b08326"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const auth = firebase.auth();
+</script></body>
 </html>
