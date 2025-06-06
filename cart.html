@@ -153,5 +153,53 @@
 
     updateCart();
   </script>
+  <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCiAtKa0tbnv3QNlBMofSYZZKjrMrO9FgM",
+    authDomain: "virutcham-exports.firebaseapp.com",
+    projectId: "virutcham-exports",
+    databaseURL: "https://virutcham-exports-default-rtdb.firebaseio.com",
+    storageBucket: "virutcham-exports.appspot.com",
+    messagingSenderId: "1009123999187",
+    appId: "1:1009123999187:web:29f5dac907e06d56b08326"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  const userInfo = document.getElementById("user-info");
+
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      userInfo.innerHTML = `
+        Hello, ${user.email} 
+        <button id="logout-btn" style="
+          margin-left: 10px; 
+          cursor: pointer; 
+          font-weight: bold; 
+          padding: 4px 8px; 
+          border: none; 
+          border-radius: 4px; 
+          background: #febd69;
+          color: #111;
+        ">
+          Logout
+        </button>
+      `;
+
+      document.getElementById("logout-btn").addEventListener("click", () => {
+        auth.signOut().then(() => {
+          window.location.reload();
+        });
+      });
+    } else {
+      userInfo.innerHTML = `<a href="login.html" style="color:#febd69; text-decoration:none; font-weight:bold;">Login/Register</a>`;
+    }
+  });
+</script>
 </body>
 </html>
