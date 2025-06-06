@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout - Virutcham Exports</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f6f6f6;
+    }
+    .checkout-container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .order-summary h2 {
+      margin-bottom: 10px;
+    }
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #ccc;
+      padding: 8px 0;
+    }
+    .total {
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    .upi {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .upi img {
+      width: 200px;
+      margin: 10px 0;
+    }
+    .place-order-btn {
+      width: 100%;
+      padding: 12px;
+      background: #f0c14b;
+      border: 1px solid #a88734;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    .place-order-btn:hover {
+      background: #e2b33d;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="checkout-container">
+    <h2>Checkout</h2>
+    <div class="order-summary" id="order-summary"></div>
+
+    <div class="upi">
+      <h3>Pay with UPI</h3>
+      <p>Scan the QR or send to:</p>
+      <strong>chandru958-1@okaxis</strong><br>
+      <img src="qr.png" alt="UPI QR Code">
+    </div>
+
+    <button class="place-order-btn" onclick="placeOrder()">Place Order</button>
+  </div>
+
+  <script src="products.js"></script>
+  <script>
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const orderSummary = document.getElementById("order-summary");
+
+    let total = 0;
+    cart.forEach(item => {
+      const product = products.find(p => p.id === item.id);
+      const itemTotal = item.quantity * product.price;
+      total += itemTotal;
+      orderSummary.innerHTML += `
+        <div class="order-item">
+          <span>${product.name} x ${item.quantity}</span>
+          <span>₹${itemTotal}</span>
+        </div>
+      `;
+    });
+
+    orderSummary.innerHTML += `<div class="total">Total: ₹${total}</div>`;
+
+    function placeOrder() {
+      if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+      }
+
+      const orderId = "ORD" + Date.now();
+      const order = {
+        id: orderId,
+        cart,
+        total,
+        date: new Date().toLocaleString()
+      };
+
+      localStorage.setItem("lastOrder", JSON.stringify(order));
+      localStorage.removeItem("cart");
+
+      alert("Order placed! Your Order ID is: " + orderId);
+      window.location.href = "order.html?id=" + orderId;
+    }
+  </script>
+
+</body>
+</html>
