@@ -9,110 +9,144 @@
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background: #f6f6f6;
     }
-    .checkout-container {
-      max-width: 700px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    .order-summary h2 {
+    h2 {
       margin-bottom: 10px;
     }
-    .order-item {
-      display: flex;
-      justify-content: space-between;
-      border-bottom: 1px solid #ccc;
-      padding: 8px 0;
+    .section {
+      margin-bottom: 25px;
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
     }
-    .total {
+    .section input, .section textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 6px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .order-summary {
       font-weight: bold;
-      font-size: 18px;
       margin-top: 10px;
     }
     .upi {
-      margin-top: 20px;
       text-align: center;
+      margin-top: 20px;
     }
     .upi img {
       width: 200px;
-      margin: 10px 0;
+      height: 200px;
+      border-radius: 12px;
     }
-    .place-order-btn {
-      width: 100%;
-      padding: 12px;
-      background: #f0c14b;
-      border: 1px solid #a88734;
+    .upi p {
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .place-btn {
+      padding: 12px 20px;
+      background: #28a745;
+      color: white;
+      border: none;
       border-radius: 6px;
       font-size: 16px;
       cursor: pointer;
+      width: 100%;
       margin-top: 20px;
-    }
-    .place-order-btn:hover {
-      background: #e2b33d;
     }
   </style>
 </head>
 <body>
 
-  <div class="checkout-container">
-    <h2>Checkout</h2>
-    <div class="order-summary" id="order-summary"></div>
+<h2>Checkout</h2>
 
-    <div class="upi">
-      <h3>Pay with UPI</h3>
-      <p>Scan the QR or send to:</p>
-      <strong>chandru958-1@okaxis</strong><br>
-      <img src="qr.png" alt="UPI QR Code">
-    </div>
+<div class="section">
+  <label>Your Name:</label>
+  <input type="text" id="name" required placeholder="Full Name">
 
-    <button class="place-order-btn" onclick="placeOrder()">Place Order</button>
-  </div>
+  <label>Shipping Address:</label>
+  <textarea id="address" rows="3" required placeholder="Enter your address..."></textarea>
 
-  <script src="products.js"></script>
-  <script>
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const orderSummary = document.getElementById("order-summary");
+  <div class="order-summary" id="summary"></div>
+</div>
 
-    let total = 0;
-    cart.forEach(item => {
-      const product = products.find(p => p.id === item.id);
-      const itemTotal = item.quantity * product.price;
+<div class="section upi">
+  <h3>Pay using UPI</h3>
+  <img src="upi-qr.png" alt="UPI QR Code">
+  <p>UPI ID: <strong>chandru958-1@okaxis</strong></p>
+  <p>Please complete the payment before placing the order.</p>
+</div>
+
+<button class="place-btn" onclick="placeOrder()">Place Order</button>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCiAtKa0tbnv3QNlBMofSYZZKjrMrO9FgM",
+    authDomain: "virutcham-exports.firebaseapp.com",
+    projectId: "virutcham-exports",
+    databaseURL: "https://virutcham-exports-default-rtdb.firebaseio.com",
+    storageBucket: "virutcham-exports.appspot.com",
+    messagingSenderId: "1009123999187",
+    appId: "1:1009123999187:web:29f5dac907e06d56b08326"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
+
+<script src="products.js"></script>
+<script>
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const summaryDiv = document.getElementById("summary");
+
+  let total = 0;
+  summaryDiv.innerHTML = "<h4>Order Summary:</h4><ul>";
+
+  cart.forEach(item => {
+    const product = products.find(p => p.id === item.id);
+    if (product) {
+      const itemTotal = product.price * item.quantity;
+      summaryDiv.innerHTML += `<li>${product.name} x ${item.quantity} = ₹${itemTotal}</li>`;
       total += itemTotal;
-      orderSummary.innerHTML += `
-        <div class="order-item">
-          <span>${product.name} x ${item.quantity}</span>
-          <span>₹${itemTotal}</span>
-        </div>
-      `;
-    });
-
-    orderSummary.innerHTML += `<div class="total">Total: ₹${total}</div>`;
-
-    function placeOrder() {
-      if (cart.length === 0) {
-        alert("Your cart is empty!");
-        return;
-      }
-
-      const orderId = "ORD" + Date.now();
-      const order = {
-        id: orderId,
-        cart,
-        total,
-        date: new Date().toLocaleString()
-      };
-
-      localStorage.setItem("lastOrder", JSON.stringify(order));
-      localStorage.removeItem("cart");
-
-      alert("Order placed! Your Order ID is: " + orderId);
-      window.location.href = "order.html?id=" + orderId;
     }
-  </script>
+  });
+
+  summaryDiv.innerHTML += `</ul><p>Total: ₹<strong>${total}</strong></p>`;
+
+  function placeOrder() {
+    const name = document.getElementById("name").value.trim();
+    const address = document.getElementById("address").value.trim();
+
+    if (!name || !address) {
+      alert("Please fill out all fields.");
+      return;
+    }
+
+    const orderId = "ORD" + Date.now();
+
+    const orderData = {
+      name,
+      address,
+      cart,
+      total,
+      timestamp: new Date().toISOString()
+    };
+
+    db.ref("orders/" + orderId).set(orderData)
+      .then(() => {
+        alert("Order placed successfully! Your Order ID is " + orderId);
+        localStorage.removeItem("cart");
+        window.location.href = "index.html";
+      })
+      .catch((err) => {
+        alert("Failed to place order: " + err.message);
+      });
+  }
+</script>
 
 </body>
 </html>
