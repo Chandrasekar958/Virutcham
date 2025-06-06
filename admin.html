@@ -1,108 +1,240 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Admin Panel - Virutcham Exports</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
     }
     .admin-container {
-      max-width: 800px;
+      max-width: 900px;
       margin: auto;
+      background: white;
       padding: 20px;
-      background: #fff;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+    h2 {
+      text-align: center;
+    }
     .product-box {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 15px;
       border-radius: 8px;
+      background: #fafafa;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr auto;
+      gap: 10px;
+      align-items: center;
     }
     .product-box input {
-      width: 100%;
-      margin: 5px 0;
       padding: 8px;
       border-radius: 6px;
       border: 1px solid #ccc;
+      width: 100%;
+      box-sizing: border-box;
     }
-    .save-btn {
-      padding: 10px;
-      background: #28a745;
-      color: white;
+    button {
+      cursor: pointer;
+      padding: 8px 12px;
       border: none;
       border-radius: 6px;
-      cursor: pointer;
+      font-weight: bold;
+      color: white;
+    }
+    .save-btn {
+      background: #28a745;
     }
     .save-btn:hover {
       background: #218838;
     }
+    .delete-btn {
+      background: #dc3545;
+    }
+    .delete-btn:hover {
+      background: #b02a37;
+    }
+    .add-section {
+      margin-top: 30px;
+      border-top: 2px solid #ddd;
+      padding-top: 20px;
+    }
+    .add-section input {
+      margin-right: 10px;
+      width: 13%;
+    }
+    .add-btn {
+      background: #007bff;
+    }
+    .add-btn:hover {
+      background: #0056b3;
+    }
   </style>
 </head>
 <body>
-  <h2>Admin Panel</h2>
-  <div id="admin"></div>  <script src="products.js"></script>  <script>
+  <div class="admin-container">
+    <h2>Virutcham Exports Admin Panel</h2>
+    <div id="products-list">Loading products...</div>
+
+    <div class="add-section">
+      <h3>Add New Product</h3>
+      <input type="text" id="new-id" placeholder="ID (unique)" />
+      <input type="text" id="new-name" placeholder="Name" />
+      <input type="text" id="new-desc" placeholder="Description" />
+      <input type="number" id="new-price" placeholder="Price" />
+      <input type="text" id="new-image" placeholder="Image URL" />
+      <input type="number" id="new-min" placeholder="Min Qty" />
+      <input type="number" id="new-max" placeholder="Max Qty" />
+      <button class="add-btn" id="add-product-btn">Add Product</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script>
     const adminEmail = "chandru958@gmail.com";
     const enteredEmail = prompt("Enter admin email:");
 
     if (enteredEmail !== adminEmail) {
-      document.body.innerHTML = "<p style='color:red'>Access Denied</p>";
-    } else {
-      const adminDiv = document.getElementById("admin");
-
-      products.forEach((p, index) => {
-        adminDiv.innerHTML += `
-          <div class="product-box">
-            <input type="text" id="name-${index}" value="${p.name}" placeholder="Name">
-            <input type="text" id="desc-${index}" value="${p.description}" placeholder="Description">
-            <input type="text" id="price-${index}" value="${p.price}" placeholder="Price">
-            <input type="text" id="img-${index}" value="${p.image}" placeholder="Image URL">
-            <input type="text" id="min-${index}" value="${p.minQty}" placeholder="Min Qty">
-            <input type="text" id="max-${index}" value="${p.maxQty}" placeholder="Max Qty">
-            <button class="save-btn" onclick="save(${index})">Save</button>
-          </div>
-        `;
-      });
-
-      window.save = function(index) {
-        products[index].name = document.getElementById(`name-${index}`).value;
-        products[index].description = document.getElementById(`desc-${index}`).value;
-        products[index].price = parseInt(document.getElementById(`price-${index}`).value);
-        products[index].image = document.getElementById(`img-${index}`).value;
-        products[index].minQty = parseInt(document.getElementById(`min-${index}`).value);
-        products[index].maxQty = parseInt(document.getElementById(`max-${index}`).value);
-        localStorage.setItem("products", JSON.stringify(products));
-        alert("Product updated (temporarily in browser)");
-      }
-
-      // Load custom products if stored
-      const saved = JSON.parse(localStorage.getItem("products"));
-      if (saved) {
-        for (let i = 0; i < products.length; i++) {
-          if (saved[i]) products[i] = saved[i];
-        }
-      }
+      document.body.innerHTML = "<p style='color:red; font-weight:bold; text-align:center; margin-top:50px;'>Access Denied</p>";
+      throw new Error("Access denied");
     }
-  </script><!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCiAtKa0tbnv3QNlBMofSYZZKjrMrO9FgM",
-    authDomain: "virutcham-exports.firebaseapp.com",
-    projectId: "virutcham-exports",
-    databaseURL: "https://virutcham-exports-default-rtdb.firebaseio.com",
-    storageBucket: "virutcham-exports.appspot.com",
-    messagingSenderId: "1009123999187",
-    appId: "1:1009123999187:web:29f5dac907e06d56b08326"
-  };
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  const auth = firebase.auth();
-</script></body>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiAtKa0tbnv3QNlBMofSYZZKjrMrO9FgM",
+      authDomain: "virutcham-exports.firebaseapp.com",
+      projectId: "virutcham-exports",
+      databaseURL: "https://virutcham-exports-default-rtdb.firebaseio.com",
+      storageBucket: "virutcham-exports.appspot.com",
+      messagingSenderId: "1009123999187",
+      appId: "1:1009123999187:web:29f5dac907e06d56b08326"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const productsListEl = document.getElementById("products-list");
+    const addBtn = document.getElementById("add-product-btn");
+
+    // Helper: Render product input boxes
+    function renderProductBox(id, product) {
+      return `
+        <div class="product-box" data-id="${id}">
+          <input type="text" class="prod-id" value="${id}" disabled />
+          <input type="text" class="prod-name" value="${product.name}" />
+          <input type="text" class="prod-desc" value="${product.description}" />
+          <input type="number" class="prod-price" value="${product.price}" />
+          <input type="text" class="prod-image" value="${product.image}" />
+          <input type="number" class="prod-min" value="${product.minQty}" />
+          <input type="number" class="prod-max" value="${product.maxQty}" />
+          <button class="save-btn">Save</button>
+          <button class="delete-btn">Delete</button>
+        </div>
+      `;
+    }
+
+    // Load and render all products from Firebase
+    function loadProducts() {
+      db.ref("products").on("value", (snapshot) => {
+        const products = snapshot.val() || {};
+        let html = "";
+        for (const id in products) {
+          html += renderProductBox(id, products[id]);
+        }
+        productsListEl.innerHTML = html;
+        attachEvents();
+      });
+    }
+
+    // Attach Save/Delete button listeners after rendering
+    function attachEvents() {
+      document.querySelectorAll(".product-box").forEach(box => {
+        const id = box.getAttribute("data-id");
+
+        box.querySelector(".save-btn").onclick = () => {
+          const updatedProduct = {
+            name: box.querySelector(".prod-name").value.trim(),
+            description: box.querySelector(".prod-desc").value.trim(),
+            price: Number(box.querySelector(".prod-price").value),
+            image: box.querySelector(".prod-image").value.trim(),
+            minQty: Number(box.querySelector(".prod-min").value),
+            maxQty: Number(box.querySelector(".prod-max").value),
+            id: id
+          };
+
+          if (!updatedProduct.name) return alert("Name cannot be empty");
+          if (isNaN(updatedProduct.price) || updatedProduct.price <= 0) return alert("Price must be a positive number");
+
+          db.ref("products/" + id).set(updatedProduct)
+            .then(() => alert("Product saved!"))
+            .catch(err => alert("Error saving product: " + err.message));
+        };
+
+        box.querySelector(".delete-btn").onclick = () => {
+          if (confirm(`Delete product "${id}"?`)) {
+            db.ref("products/" + id).remove()
+              .then(() => alert("Product deleted!"))
+              .catch(err => alert("Error deleting product: " + err.message));
+          }
+        };
+      });
+    }
+
+    // Add new product
+    addBtn.onclick = () => {
+      const newId = document.getElementById("new-id").value.trim();
+      const newName = document.getElementById("new-name").value.trim();
+      const newDesc = document.getElementById("new-desc").value.trim();
+      const newPrice = Number(document.getElementById("new-price").value);
+      const newImage = document.getElementById("new-image").value.trim();
+      const newMin = Number(document.getElementById("new-min").value);
+      const newMax = Number(document.getElementById("new-max").value);
+
+      if (!newId) return alert("Product ID is required and must be unique");
+      if (!newName) return alert("Name is required");
+      if (isNaN(newPrice) || newPrice <= 0) return alert("Price must be a positive number");
+
+      db.ref("products/" + newId).get().then(snapshot => {
+        if (snapshot.exists()) {
+          alert("Product ID already exists, please choose a different one");
+          return;
+        }
+
+        const newProduct = {
+          id: newId,
+          name: newName,
+          description: newDesc,
+          price: newPrice,
+          image: newImage,
+          minQty: newMin || 1,
+          maxQty: newMax || 123
+        };
+
+        db.ref("products/" + newId).set(newProduct)
+          .then(() => {
+            alert("Product added!");
+            // Clear inputs
+            document.getElementById("new-id").value = "";
+            document.getElementById("new-name").value = "";
+            document.getElementById("new-desc").value = "";
+            document.getElementById("new-price").value = "";
+            document.getElementById("new-image").value = "";
+            document.getElementById("new-min").value = "";
+            document.getElementById("new-max").value = "";
+          })
+          .catch(err => alert("Error adding product: " + err.message));
+      });
+    };
+
+    // Initial load
+    loadProducts();
+  </script>
+</body>
 </html>
