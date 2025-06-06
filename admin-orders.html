@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Orders - Virutcham Exports</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    h2 {
+      text-align: center;
+      color: #232f3e;
+    }
+    .order {
+      background: white;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+    }
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .order-status {
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .status-processing { background: #f0ad4e; color: white; }
+    .status-shipped { background: #0275d8; color: white; }
+    .status-delivered { background: #5cb85c; color: white; }
+    .order-details {
+      margin-top: 10px;
+    }
+    .product-list {
+      margin-top: 10px;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+    }
+    .product-list li {
+      margin-bottom: 5px;
+    }
+    select {
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    #logout-btn {
+      margin-bottom: 20px;
+      padding: 8px 16px;
+      background: #febd69;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #111;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Admin Orders - Virutcham Exports</h2>
+<button id="logout-btn">Logout</button>
+<div id="orders-container">
+  <p>Loading orders...</p>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCiAtKa0tbnv3QNlBMofSYZZKjrMrO9FgM",
+    authDomain: "virutcham-exports.firebaseapp.com",
+    projectId: "virutcham-exports",
+    databaseURL: "https://virutcham-exports-default-rtdb.firebaseio.com",
+    storageBucket: "virutcham-exports.appspot.com",
+    messagingSenderId: "1009123999187",
+    appId: "1:1009123999187:web:29f5dac907e06d56b08326"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  const adminEmail = "chandru958@gmail.com";
+  const ordersContainer = document.getElementById("orders-container");
+  const logoutBtn = document.getElementById("logout-btn");
+
+  // Logout button
+  logoutBtn.onclick = () => {
+    auth.signOut().then(() => {
+      location.reload();
+    });
+  };
+
+  // Check auth state
+  auth.onAuthStateChanged(user => {
+    if (user && user.email === adminEmail) {
+      loadOrders();
+    } else {
+      const email = prompt("Enter admin email to login:");
+      if (email === adminEmail) {
+        // Sign in anonymously (you can adjust with password/email if you want)
+        auth.signInAnonymously().catch(console.error);
+      } else {
+        ordersContainer.innerHTML = "<p style='color:red;'>Access Denied</p>";
+      }
+    }
+  });
+
+  // Load orders from Firebase
+  function loadOrders() {
+    ordersContainer.innerHTML = "<p>Loading orders...</p>";
+    db.ref("orders").on("value", snapshot => {
+      const orders = snapshot.val();
+      if (!orders) {
+        ordersContainer.innerHTML = "<p>No orders found.</p>";
+        return;
+      }
+
+      ordersContainer.innerHTML = "";
+      Object.keys(orders).forEach(orderId => {
+        const order = orders[orderId];
+
+        const orderDiv = document.createElement("div");
+        orderDiv.className = "order";
+
+        // Status color class
+        let statusClass = "";
+        switch ((order.status || "").toLowerCase()) {
+          case "processing": statusClass = "status-processing"; break;
+          case "shipped": statusClass = "status-shipped"; break;
+          case "delivered": statusClass = "status-delivered"; break;
+          default: statusClass = "";
+        }
+
+        orderDiv.innerHTML = `
+          <div class="order-header">
+            <strong>Order ID: ${orderId}</strong>
+            <select class="order-status ${statusClass}">
+              <option value="Processing" ${order.status === "Processing" ? "selected" : ""}>Processing</option>
+              <option value="Shipped" ${order.status === "Shipped" ? "selected" : ""}>Shipped</option>
+              <option value="Delivered" ${order.status === "Delivered" ? "selected" : ""}>Delivered</option>
+            </select>
+          </div>
+          <div class="order-details">
+            <p><strong>Customer:</strong> ${order.customerName || "N/A"}</p>
+            <p><strong>Email:</strong> ${order.customerEmail || "N/A"}</p>
+            <p><strong>Phone:</strong> ${order.customerPhone || "N/A"}</p>
+            <p><strong>Address:</strong> ${order.customerAddress || "N/A"}</p>
+            <p><strong>Total:</strong> ₹${order.total || "0"}</p>
+            <p><strong>Products:</strong></p>
+            <ul class="product-list">
+              ${Object.entries(order.products || {}).map(([pid, qty]) => `<li>${pid} — Quantity: ${qty}</li>`).join("")}
+            </ul>
+          </div>
+        `;
+
+        // Listen to status change
+        const select = orderDiv.querySelector("select.order-status");
+        select.addEventListener("change", (e) => {
+          const newStatus = e.target.value;
+          db.ref("orders/" + orderId + "/status").set(newStatus);
+          alert(`Order ${orderId} status updated to ${newStatus}`);
+          loadOrders(); // Refresh colors
+        });
+
+        ordersContainer.appendChild(orderDiv);
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
