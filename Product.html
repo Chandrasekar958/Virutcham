@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product Details</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .product-details {
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .product-details img {
+      max-width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .product-details h2 {
+      margin: 10px 0;
+    }
+
+    .price {
+      color: #e91e63;
+      font-weight: bold;
+      font-size: 1.3rem;
+    }
+
+    .quantity {
+      margin: 15px 0;
+    }
+
+    .quantity input {
+      width: 60px;
+      font-size: 1rem;
+      text-align: center;
+      padding: 5px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" style="margin: 20px; display: inline-block;">← Back to Home</a>
+
+  <div id="product-container" class="product-details"></div>
+
+  <script src="products.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+    const product = products.find(p => p.id === id);
+    const container = document.getElementById("product-container");
+
+    if (!product) {
+      container.innerHTML = "<p>Product not found.</p>";
+    } else {
+      container.innerHTML = `
+        <img src="${product.image}" alt="${product.name}">
+        <h2>${product.name}</h2>
+        <p class="price">₹${product.price}</p>
+        <p>${product.description}</p>
+        <div class="quantity">
+          Quantity: 
+          <input type="number" id="qty" min="${product.minQty}" max="${product.maxQty}" value="${product.minQty}">
+        </div>
+        <button class="btn add-btn" onclick="addToCart('${product.id}')">Add to Cart</button>
+      `;
+    }
+
+    function addToCart(id) {
+      const qty = parseInt(document.getElementById("qty").value);
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const existing = cart.find(item => item.id === id);
+      if (existing) {
+        existing.quantity += qty;
+      } else {
+        cart.push({ id, quantity: qty });
+      }
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert("Added to cart!");
+    }
+  </script>
+</body>
+</html>
