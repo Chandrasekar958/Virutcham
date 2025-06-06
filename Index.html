@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Virutcham Exports</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>🧺 Virutcham Exports</h1>
+    <p>High-quality undergarments and cotton products at the best price!</p>
+    <a href="cart.html" class="cart-link">🛒 Cart (<span id="cart-count">0</span>)</a>
+  </header>
+
+  <main id="product-list" class="product-grid"></main>
+
+  <script src="products.js"></script>
+  <script>
+    const cartCountEl = document.getElementById("cart-count");
+    const productList = document.getElementById("product-list");
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    function updateCartCount() {
+      const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+      cartCountEl.textContent = total;
+    }
+
+    function addToCart(id) {
+      const existing = cart.find(p => p.id === id);
+      if (existing) {
+        existing.quantity++;
+      } else {
+        cart.push({ id, quantity: 1 });
+      }
+      localStorage.setItem("cart", JSON.stringify(cart));
+      updateCartCount();
+      alert("Added to cart!");
+    }
+
+    products.forEach(p => {
+      const productCard = document.createElement("div");
+      productCard.className = "product-card";
+      productCard.innerHTML = `
+        <img src="${p.image}" alt="${p.name}">
+        <h3>${p.name}</h3>
+        <p class="price">₹${p.price}</p>
+        <div class="buttons">
+          <a href="product.html?id=${p.id}" class="btn view-btn">View</a>
+          <button class="btn add-btn" onclick="addToCart('${p.id}')">Add to Cart</button>
+        </div>
+      `;
+      productList.appendChild(productCard);
+    });
+
+    updateCartCount();
+  </script>
+</body>
+</html>
