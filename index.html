@@ -7,11 +7,23 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>🧺 Virutcham Exports</h1>
-    <p>High-quality undergarments and cotton products at the best price!</p>
-    <a href="cart.html" class="cart-link">🛒 Cart (<span id="cart-count">0</span>)</a>
-  </header>
+<header class="header" style="display:flex; align-items:center; padding:10px; background:#232f3e; color:white;">
+  <div class="logo" style="font-weight:bold; font-size:1.5rem; flex-grow:1;">Virutcham Exports</div>
+
+  <input
+    type="search"
+    id="search"
+    placeholder="Search products..."
+    aria-label="Search products"
+    style="padding:8px; border-radius:6px; border:none; width:250px;"
+  />
+
+  <div id="user-info" style="margin-left:20px; font-weight:bold;"></div>
+
+  <a href="cart.html" class="cart-btn" aria-label="Go to cart" style="color:white; margin-left:20px; font-size:1.5rem; text-decoration:none;">
+    🛒 <span id="cart-count" style="font-weight:bold;">0</span>
+  </a>
+</header>
 
   <main id="product-list" class="product-grid"></main>
 
