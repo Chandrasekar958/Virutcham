@@ -2,220 +2,194 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cart - Virutcham Exports</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: 20px auto;
+      background: #f8f8f8;
+      margin: 0;
       padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    .cart-container {
+      max-width: 900px;
+      margin: auto;
       background: #fff;
-      border-radius: 10px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    h1 {
-      color: #232f3e;
-      text-align: center;
+    .cart-item {
+      border-bottom: 1px solid #ccc;
+      padding: 10px 0;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 15px;
+    .cart-item:last-child {
+      border-bottom: none;
     }
-    th, td {
-      border-bottom: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
+    .cart-item h4 {
+      margin: 0;
+      font-size: 1.1rem;
     }
-    th {
-      background-color: #febd69;
-      color: #111;
-    }
-    .address-form label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    .address-form input {
-      width: 100%;
-      padding: 8px;
-      margin-top: 4px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    .payment-buttons {
+    .cart-summary {
       margin-top: 20px;
-      text-align: center;
+      font-weight: bold;
+      text-align: right;
+      font-size: 1.1rem;
     }
-    .payment-buttons button {
-      background-color: #febd69;
+    .address-section input, .address-section textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .payment-options button {
+      padding: 10px 15px;
+      margin-right: 10px;
       border: none;
-      padding: 12px 25px;
-      margin: 0 10px;
-      font-size: 1rem;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
-      transition: background-color 0.3s ease;
     }
-    .payment-buttons button:hover {
-      background-color: #f7a600;
+    .payment-options button.active {
+      background: #232f3e;
+      color: white;
     }
-    .empty-msg {
-      text-align: center;
-      margin-top: 50px;
-      color: #888;
-      font-size: 1.2rem;
+    .upi-section {
+      background: #f4f4f4;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+      display: none;
+    }
+    #place-order-btn {
+      background: #28a745;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      margin-top: 20px;
+      cursor: pointer;
+      width: 100%;
+    }
+    #place-order-btn:hover {
+      background: #218838;
     }
   </style>
 </head>
 <body>
 
-  <h1>Your Cart</h1>
+  <div class="cart-container">
+    <h2>Your Cart</h2>
+    <div id="cart-items"></div>
 
-  <div id="cart-container"></div>
+    <div class="cart-summary" id="cart-summary"></div>
 
-  <h2>Shipping Address</h2>
-  <form class="address-form" id="address-form">
-    <label for="fullname">Full Name</label>
-    <input type="text" id="fullname" required />
+    <h3>Shipping Address</h3>
+    <div class="address-section">
+      <input type="text" id="fullname" placeholder="Full Name" required />
+      <input type="tel" id="phone" placeholder="Phone Number" required />
+      <textarea id="address" placeholder="Address" rows="3" required></textarea>
+      <input type="text" id="city" placeholder="City" required />
+      <input type="text" id="state" placeholder="State" required />
+      <input type="text" id="pincode" placeholder="Pincode" required />
+    </div>
 
-    <label for="addressLine">Address Line</label>
-    <input type="text" id="addressLine" required />
+    <h3>Select Payment Method</h3>
+    <div class="payment-options">
+      <button onclick="selectPayment('upi')" id="upi-btn">UPI</button>
+      <button onclick="selectPayment('razorpay')">Razorpay</button>
+      <button onclick="selectPayment('netbanking')">Net Banking</button>
+    </div>
 
-    <label for="city">City</label>
-    <input type="text" id="city" required />
+    <div class="upi-section" id="upi-section">
+      <p><strong>Pay using UPI:</strong></p>
+      <img src="qr.png" alt="UPI QR Code" style="max-width:200px;" />
+      <p>or UPI ID: <strong>chandru958-1@okaxis</strong></p>
+    </div>
 
-    <label for="pincode">Pincode</label>
-    <input type="text" id="pincode" required pattern="\d{6}" title="6 digit pincode" />
-
-    <label for="state">State</label>
-    <input type="text" id="state" required />
-  </form>
-
-  <div class="payment-buttons">
-    <button onclick="payWithUPI()">Pay with UPI</button>
-    <button onclick="payWithNetBanking()">Pay with Net Banking</button>
-    <button onclick="payWithRazorpay()">Pay with Razorpay</button>
+    <button id="place-order-btn">Place Order</button>
   </div>
 
-<script>
-  // Sample products array; replace with your actual product list or import it
-  const products = [
-    { id: "briefs", name: "Men’s Briefs", price: 45 },
-    { id: "trunks", name: "Men’s Trunks", price: 70 },
-    { id: "white-vest", name: "Men’s White Vest", price: 60 },
-    { id: "white-vest-short", name: "Men’s White Vest Short Sleeves", price: 75 },
-    { id: "colour-vest", name: "Men’s Colour Vest", price: 65 },
-    { id: "shorts", name: "Men’s Shorts", price: 199 },
-    { id: "cotton-towels", name: "Cotton Towels", price: 50 },
-    { id: "cotton-bedsheets", name: "Cotton Bedsheets", price: 140 }
-  ];
+  <script src="products.js"></script>
+  <script>
+    const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
+    const cartEl = document.getElementById("cart-items");
+    const summaryEl = document.getElementById("cart-summary");
+    let selectedPayment = "";
 
-  const cartContainer = document.getElementById('cart-container');
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-  function renderCart() {
-    if (cart.length === 0) {
-      cartContainer.innerHTML = '<p class="empty-msg">Your cart is empty.</p>';
-      return;
+    function renderCart() {
+      let total = 0;
+      cartEl.innerHTML = "";
+      cartItems.forEach(item => {
+        const product = products.find(p => p.id === item.id);
+        if (product) {
+          const itemTotal = product.price * item.quantity;
+          total += itemTotal;
+          cartEl.innerHTML += `
+            <div class="cart-item">
+              <h4>${product.name} (x${item.quantity})</h4>
+              <p>₹${product.price} each = ₹${itemTotal}</p>
+            </div>
+          `;
+        }
+      });
+      summaryEl.textContent = `Total: ₹${total}`;
     }
 
-    let html = `<table>
-      <thead>
-        <tr><th>Product</th><th>Quantity</th><th>Price (₹)</th><th>Total (₹)</th></tr>
-      </thead>
-      <tbody>`;
+    renderCart();
 
-    let grandTotal = 0;
-    cart.forEach(item => {
-      const product = products.find(p => p.id === item.id);
-      if (!product) return;
-
-      const total = product.price * item.quantity;
-      grandTotal += total;
-
-      html += `<tr>
-        <td>${product.name}</td>
-        <td>${item.quantity}</td>
-        <td>${product.price.toFixed(2)}</td>
-        <td>${total.toFixed(2)}</td>
-      </tr>`;
-    });
-
-    html += `</tbody></table>`;
-    html += `<p style="text-align:right; font-weight:bold; font-size:1.2rem;">Grand Total: ₹${grandTotal.toFixed(2)}</p>`;
-
-    cartContainer.innerHTML = html;
-  }
-
-  function saveOrderAndRedirect(paymentMethod) {
-    const name = document.getElementById("fullname").value.trim();
-    const addressLine = document.getElementById("addressLine").value.trim();
-    const city = document.getElementById("city").value.trim();
-    const pincode = document.getElementById("pincode").value.trim();
-    const state = document.getElementById("state").value.trim();
-
-    if (!name || !addressLine || !city || !pincode || !state) {
-      alert("Please fill in all address fields.");
-      return;
+    function selectPayment(method) {
+      selectedPayment = method;
+      document.querySelectorAll(".payment-options button").forEach(btn => btn.classList.remove("active"));
+      document.getElementById("upi-section").style.display = method === "upi" ? "block" : "none";
+      document.getElementById(method + "-btn")?.classList.add("active");
     }
 
-    if (!/^\d{6}$/.test(pincode)) {
-      alert("Please enter a valid 6-digit pincode.");
-      return;
+    function generateOrderID() {
+      return 'ORD-' + Date.now().toString(36).toUpperCase();
     }
 
-    if (cart.length === 0) {
-      alert("Your cart is empty.");
-      return;
-    }
+    document.getElementById("place-order-btn").addEventListener("click", () => {
+      const name = document.getElementById("fullname").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const address = document.getElementById("address").value.trim();
+      const city = document.getElementById("city").value.trim();
+      const state = document.getElementById("state").value.trim();
+      const pincode = document.getElementById("pincode").value.trim();
 
-    const fullAddress = `${name}, ${addressLine}, ${city}, ${pincode}, ${state}`;
+      if (!name || !phone || !address || !city || !state || !pincode || !selectedPayment) {
+        alert("Please fill all details and select payment method.");
+        return;
+      }
 
-    // Prepare order items with full details
-    const orderedItems = cart.map(cartItem => {
-      const product = products.find(p => p.id === cartItem.id);
-      return {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: cartItem.quantity
+      const orderId = generateOrderID();
+      const order = {
+        id: orderId,
+        name,
+        phone,
+        address: `${address}, ${city}, ${state} - ${pincode}`,
+        cart: cartItems,
+        total: summaryEl.textContent,
+        paymentMethod: selectedPayment,
+        status: "Pending"
       };
+
+      // Save order locally
+      const orders = JSON.parse(localStorage.getItem("orders")) || [];
+      orders.push(order);
+      localStorage.setItem("orders", JSON.stringify(orders));
+      localStorage.removeItem("cart");
+
+      alert("Order Placed! Your Order ID: " + orderId);
+      window.location.href = "track.html";
     });
-
-    // Save order data
-    const orderData = {
-      address: fullAddress,
-      items: orderedItems,
-      paymentMethod: paymentMethod,
-      orderDate: new Date().toISOString()
-    };
-    localStorage.setItem('orderData', JSON.stringify(orderData));
-
-    // Clear cart
-    localStorage.removeItem('cart');
-
-    alert(`Thank you! Your order will be processed.\n\nShipping to:\n${fullAddress}\nPayment Method: ${paymentMethod}`);
-
-    // Redirect to order summary page
-    window.location.href = "order-summary.html";
-  }
-
-  function payWithUPI() {
-    saveOrderAndRedirect('UPI');
-  }
-
-  function payWithNetBanking() {
-    saveOrderAndRedirect('Net Banking');
-  }
-
-  function payWithRazorpay() {
-    saveOrderAndRedirect('Razorpay');
-  }
-
-  renderCart();
-</script>
-
+  </script>
 </body>
 </html>
